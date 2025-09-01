@@ -45,11 +45,10 @@ public class PostController {
         return "post/form";
     }
 
-    // 게시글 저장 → 목록으로 (RedirectAttributes 파라미터 추가)
+    // 게시글 저장 → 목록으로
     @PostMapping("/posts")
-    public String create(@ModelAttribute Post post, RedirectAttributes redirectAttributes) {
+    public String create(@ModelAttribute Post post) {
         postService.save(post);
-        redirectAttributes.addFlashAttribute("message", "✅ 게시글이 등록되었습니다!");
         return "redirect:/posts";
     }
 
@@ -61,18 +60,18 @@ public class PostController {
         return "post/form";
     }
 
-    // 게시글 수정 → 상세보기로 (RedirectAttributes 파라미터 추가)
+    // 게시글 수정 → 상세보기로
     @PostMapping("/posts/{seq}")
-    public String update(@PathVariable Long seq, @ModelAttribute Post post, RedirectAttributes redirectAttributes) {
+    public String update(@PathVariable Long seq, @ModelAttribute Post post) {
         postService.update(seq, post);
-        redirectAttributes.addFlashAttribute("message", "✅ 게시글이 수정되었습니다!");
         return "redirect:/posts/" + seq;
     }
 
-    // 게시글 삭제 → 목록으로 (RedirectAttributes 파라미터 추가)
+    // 게시글 삭제 → 목록으로
     @PostMapping("/posts/{seq}/delete")
-    public String delete(@PathVariable Long seq, RedirectAttributes redirectAttributes) {
+    public String delete(@PathVariable Long seq) {
         postService.delete(seq);
-        redirectAttributes.addFlashAttribute("message", "✅ 게시글이 삭제되었습니다!");
+
         return "redirect:/posts";
+
     } }
