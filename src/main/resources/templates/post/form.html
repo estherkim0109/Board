@@ -51,19 +51,7 @@
     </section>
 </main>
 
-<!-- ✅ FOOTER -->
-<footer class="bg-white shadow-inner mt-auto py-4">
-    <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-500">
-        © 2025 Goorm Board. All rights reserved.
-    </div>
-</footer>
-
-<script>
-    function handleSubmit(event) {
-        event.preventDefault();
-        alert("글이 등록되었습니다!");
-        window.location.href = "board.html";
-    }
-</script>
+<!-- FOOTER -->
+<th:block th:replace="~{fragments/footer :: footer}"></th:block>
 </body>
 </html>
