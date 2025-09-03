@@ -25,6 +25,7 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. seq=" + seq));
     }
 
+
     // 게시글 저장
     @Transactional  // 쓰기 작업은 별도 트랜잭션
     public Post save(Post post) {

@@ -1,31 +1,44 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
 <head>
-    <th:block th:replace="~{fragments/head :: common-head}"></th:block>
-    <title>Goorm Board - 글 상세</title>
+    <title>글 상세</title>
 </head>
-<body class="flex flex-col min-h-screen bg-gray-50 text-gray-800">
-<!-- HEADER -->
-<th:block th:replace="~{fragments/header :: header}"></th:block>
-
-<!-- ✅ POST DETAIL PAGE -->
-<main class="flex-1">
+<body>
+<div layout:fragment="content">
     <section class="max-w-3xl mx-auto px-4 py-12">
         <article class="bg-white p-6 rounded shadow">
             <h1 th:text="${post.title}" class="text-2xl font-bold mb-2">게시글 제목</h1>
+            <span th:if="${#strings.contains(post.title, '긴급')}" class="bg-red-100 text-red-800 px-2 py-1 rounded">
+    🚨 긴급
+</span>
             <div class="text-sm text-gray-500 mb-4">
                 <span>작성자: </span><span th:text="${post.author}">작성자</span>
-                <span> · 작성일: </span><span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}">2025-01-01</span>
+                <span> · 작성일: </span><span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2025-01-01 14:30:25</span>
                 <span> · 조회수: </span><span th:text="${post.viewCount}">0</span>
-            </div>
+                <p th:text="${#temporals.dayOfWeekName(post.createdAt)}">월요일</p>
+                <span th:if="${#temporals.day(post.createdAt) == #temporals.day(#temporals.createNow())}"
+                      class="text-green-600">오늘</span>
+                <span th:unless="${#temporals.day(post.createdAt) == #temporals.day(#temporals.createNow())}"
+                      th:text="${#temporals.format(post.createdAt, 'MM-dd')}">01-15</span>
+
+
+            <!/div>
             <div class="prose max-w-none">
                 <div th:text="${post.content}" class="whitespace-pre-wrap">
                     게시글 내용
                 </div>
+                <span th:if="${#strings.length(post.content) > 1}" class="text-red-500">
+    긴 글
+</span>
+
             </div>
+
         </article>
 
-        <!-- ✅ ACTIONS -->
+
+        <!-- ACTIONS -->
         <div class="mt-6 flex justify-between">
             <a th:href="@{/posts}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm">목록</a>
             <div class="space-x-2">
@@ -36,9 +49,6 @@
             </div>
         </div>
     </section>
-</main>
-
-<!-- FOOTER -->
-<th:block th:replace="~{fragments/footer :: footer}"></th:block>
+</div>
 </body>
 </html>

@@ -31,9 +31,14 @@ public class Post {
     @Column(columnDefinition = "BIGINT DEFAULT 0")
     private Long viewCount  = 0L;  //조회수
 
+
     @CreationTimestamp  // 자동으로 현재 시간 입력
     @Column(updatable = false)  // 수정 불가
     private LocalDateTime createdAt;  // 작성일시
+
+    @NotBlank(message = "제목은 필수입니다")
+    @Size(min = 1, max = 200, message = "제목은 1~200자로 입력해주세요")
+    private String title;
 
 
 }
