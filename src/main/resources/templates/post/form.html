@@ -37,7 +37,7 @@
 
             <div>
                 <label class="block text-sm font-medium mb-1" for="title">
-                    제목<span class="text-res-500">*</span>
+                    제목<span class="text-red-500">*</span>
                 </label>
                 <input type="text" th:field="*{title}"
                        th:class="${#fields.hasErrors('title')} ? 'w-full border rounded px-4 py-2 error-input' : 'w-full border rounded px-4 py-2'"
@@ -45,7 +45,9 @@
 
                 <!-- 제목 오류 메시지 -->
                 <div th:if="${#fields.hasErrors('title')}" class="error-message">
-                    <div th:each="error : ${#fields.errors('title')}" th:text="${error}">오류 메시지</div>
+                    <div th:each="error : ${#fields.errors('title')}" th:if="${error.contains('필수')}" th:text="${error}"></div>
+                    <!-- 나머지 메시지 -->
+                    <div th:each="error : ${#fields.errors('title')}" th:if="${!error.contains('필수')}" th:text="${error}"></div>
                 </div>
             </div>
 
@@ -58,7 +60,9 @@
                        placeholder="작성자명을 입력하세요 (2~50자)" />
                 <!-- 작성자 오류 메시지 -->
                 <div th:if="${#fields.hasErrors('author')}" class="error-message">
-                    <div th:each="error : ${#fields.errors('author')}" th:text="${error}">오류 메시지</div>
+                    <div th:each="error : ${#fields.errors('author')}" th:if="${error.contains('필수')}" th:text="${error}"></div>
+                    <!-- 나머지 메시지 -->
+                    <div th:each="error : ${#fields.errors('author')}" th:if="${!error.contains('필수')}" th:text="${error}"></div>
                 </div>
             </div>
 
@@ -72,7 +76,9 @@
 
                 <!-- 내용 오류 메시지 -->
                 <div th:if="${#fields.hasErrors('content')}" class="error-message">
-                    <div th:each="error : ${#fields.errors('content')}" th:text="${error}">오류 메시지</div>
+                    <div th:each="error : ${#fields.errors('content')}" th:if="${error.contains('필수')}" th:text="${error}"></div>
+                    <!-- 나머지 메시지 -->
+                    <div th:each="error : ${#fields.errors('content')}" th:if="${!error.contains('필수')}" th:text="${error}"></div>
                 </div>
             </div>
 
