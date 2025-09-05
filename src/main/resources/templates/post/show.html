@@ -10,38 +10,24 @@
     <section class="max-w-3xl mx-auto px-4 py-12">
         <article class="bg-white p-6 rounded shadow">
             <h1 th:text="${post.title}" class="text-2xl font-bold mb-2">게시글 제목</h1>
-            <span th:if="${#strings.contains(post.title, '긴급')}" class="bg-red-100 text-red-800 px-2 py-1 rounded">
-    🚨 긴급
-</span>
             <div class="text-sm text-gray-500 mb-4">
-                <span>작성자: </span><span th:text="${post.author}">작성자</span>
-                <span> · 작성일: </span><span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2025-01-01 14:30:25</span>
+                <span>작성자: </span><span th:text="${post.author.nickname}">작성자</span>
+                <span> · 작성일: </span><span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}">2025-01-01</span>
                 <span> · 조회수: </span><span th:text="${post.viewCount}">0</span>
-                <p th:text="${#temporals.dayOfWeekName(post.createdAt)}">월요일</p>
-                <span th:if="${#temporals.day(post.createdAt) == #temporals.day(#temporals.createNow())}"
-                      class="text-green-600">오늘</span>
-                <span th:unless="${#temporals.day(post.createdAt) == #temporals.day(#temporals.createNow())}"
-                      th:text="${#temporals.format(post.createdAt, 'MM-dd')}">01-15</span>
-
-
-            <!/div>
+            </div>
             <div class="prose max-w-none">
                 <div th:text="${post.content}" class="whitespace-pre-wrap">
                     게시글 내용
                 </div>
-                <span th:if="${#strings.length(post.content) > 1}" class="text-red-500">
-    긴 글
-</span>
-
             </div>
-
         </article>
-
 
         <!-- ACTIONS -->
         <div class="mt-6 flex justify-between">
             <a th:href="@{/posts}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm">목록</a>
-            <div class="space-x-2">
+
+            <!-- 본인 글만 수정/삭제 버튼 표시 -->
+            <div th:if="${session.user != null and session.user.id == post.author.id}" class="space-x-2">
                 <a th:href="@{/posts/{id}/edit(id=${post.seq})}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">수정</a>
                 <form th:action="@{/posts/{id}/delete(id=${post.seq})}" method="post" class="inline" onsubmit="return confirm('정말 삭제하시겠습니까?')">
                     <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm">삭제</button>
