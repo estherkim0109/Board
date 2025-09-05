@@ -1,7 +1,9 @@
 spring:
 
+
+
   messages:
-    basename: messages/ValidationMessages
+    basename: messages/ValidationMessages,messages/i18n/messages
     encoding: UTF-8
 
   datasource:

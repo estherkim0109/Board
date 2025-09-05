@@ -14,9 +14,13 @@
             <p class="text-lg" th:if="${username}" th:text="|안녕하세요, ${username}님!|">환영 메시지</p>
             <p class="text-lg" th:unless="${username}">로그인하여 더 많은 기능을 이용하세요!</p>
         </div>
-        <a th:href="@{/posts}" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-lg font-medium">
+        <div class="mb-10"><a th:href="@{/posts}" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-lg font-medium">
             게시판 보러가기
-        </a>
+        </a></div>
+        <div><a th:href="@{/jokebear}" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-lg font-medium">
+            jokebear 보러가기
+        </a></div>
+
     </section>
 </div>
 </body>
