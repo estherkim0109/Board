@@ -97,12 +97,9 @@ public class AuthController {
         redirectAttributes.addFlashAttribute("successMessage", message);
         return "redirect:/";
     }
-    @GetMapping("/profile")
+    @GetMapping("/profile")//user==null
     public String profileForm(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return "redirect:/auth/login";
-        }
 
         // 최신 사용자 정보 조회
         User currentUser = userService.findById(user.getId());
@@ -117,7 +114,7 @@ public class AuthController {
         return "auth/profile";
     }
 
-    @PostMapping("/profile")
+    @PostMapping("/profile")//user==null
     public String updateProfile(@Valid @ModelAttribute ProfileUpdateDto profileUpdateDto,
                                 BindingResult result,
                                 HttpSession session,
@@ -126,9 +123,7 @@ public class AuthController {
                                 Locale locale) {
 
         User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return "redirect:/auth/login";
-        }
+
 
         if (result.hasErrors()) {
             User currentUser = userService.findById(user.getId());
