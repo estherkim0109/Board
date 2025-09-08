@@ -161,4 +161,9 @@ public class PostController {
         throw new RuntimeException("This is a test error for demonstration");
     }
 
+    @GetMapping("/jokebear")
+    public String showJokebearPage() {
+        return "my"; // src/main/resources/templates/my.html 파일을 찾아 연결
+    }
+
 }
