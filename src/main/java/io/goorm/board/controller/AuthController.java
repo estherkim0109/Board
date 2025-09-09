@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,26 +25,26 @@ import java.util.Locale;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    
+
     private final UserService userService;
     private final MessageSource messageSource;
-    
+
     @GetMapping("/signup")
     public String signupForm(Model model) {
         model.addAttribute("signupDto", new SignupDto());
         return "auth/signup";
     }
-    
+
     @PostMapping("/signup")
-    public String signup(@Valid @ModelAttribute SignupDto signupDto, 
-                        BindingResult result,
-                        RedirectAttributes redirectAttributes,
-                        Locale locale) {
-        
+    public String signup(@Valid @ModelAttribute SignupDto signupDto,
+                         BindingResult result,
+                         RedirectAttributes redirectAttributes,
+                         Locale locale) {
+
         if (result.hasErrors()) {
             return "auth/signup";
         }
-        
+
         try {
             User user = userService.signup(signupDto);
             String message = messageSource.getMessage("flash.user.created", null, locale);
@@ -54,52 +55,19 @@ public class AuthController {
             return "auth/signup";
         }
     }
+
     @GetMapping("/login")
     public String loginForm(Model model) {
         model.addAttribute("loginDto", new LoginDto());
         return "auth/login";
     }
 
-    @PostMapping("/login")
-    public String login(@Valid @ModelAttribute LoginDto loginDto,
-                        BindingResult result,
-                        HttpSession session,
-                        RedirectAttributes redirectAttributes,
-                        Locale locale) {
+    // Spring Security가 자동으로 로그인을 처리합니다
 
-        if (result.hasErrors()) {
-            return "auth/login";
-        }
+    // Spring Security가 자동으로 로그아웃을 처리합니다
 
-        try {
-            User user = userService.authenticate(loginDto);
-
-            // 세션에 사용자 정보 저장
-            session.setAttribute("user", user);
-
-            String message = messageSource.getMessage("flash.login.success", null, "로그인되었습니다.", locale);
-            redirectAttributes.addFlashAttribute("successMessage", message);
-            return "redirect:/";
-        } catch (Exception e) {
-            result.reject("login.failed", e.getMessage());
-            return "auth/login";
-        }
-    }
-
-    @PostMapping("/logout")
-    public String logout(HttpSession session,
-                         RedirectAttributes redirectAttributes,
-                         Locale locale) {
-
-        session.invalidate();
-
-        String message = messageSource.getMessage("flash.logout.success", null, "로그아웃되었습니다.", locale);
-        redirectAttributes.addFlashAttribute("successMessage", message);
-        return "redirect:/";
-    }
-    @GetMapping("/profile")//user==null
-    public String profileForm(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("user");
+    @GetMapping("/profile")
+    public String profileForm(@AuthenticationPrincipal User user, Model model) {
 
         // 최신 사용자 정보 조회
         User currentUser = userService.findById(user.getId());
@@ -114,16 +82,13 @@ public class AuthController {
         return "auth/profile";
     }
 
-    @PostMapping("/profile")//user==null
+    @PostMapping("/profile")
     public String updateProfile(@Valid @ModelAttribute ProfileUpdateDto profileUpdateDto,
                                 BindingResult result,
-                                HttpSession session,
+                                @AuthenticationPrincipal User user,
                                 RedirectAttributes redirectAttributes,
                                 Model model,
                                 Locale locale) {
-
-        User user = (User) session.getAttribute("user");
-
 
         if (result.hasErrors()) {
             User currentUser = userService.findById(user.getId());
@@ -132,10 +97,7 @@ public class AuthController {
         }
 
         try {
-            User updatedUser = userService.updateProfile(user.getId(), profileUpdateDto);
-
-            // 세션의 사용자 정보 업데이트
-            session.setAttribute("user", updatedUser);
+            userService.updateProfile(user.getId(), profileUpdateDto);
 
             String message = messageSource.getMessage("flash.profile.updated", null, "프로필이 수정되었습니다.", locale);
             redirectAttributes.addFlashAttribute("successMessage", message);

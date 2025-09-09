@@ -7,6 +7,7 @@ import io.goorm.board.service.PostService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -44,21 +45,19 @@ public class PostController {
         return "post/show";
     }
 
-    // 게시글 작성 폼 //user=null제거
+    // 게시글 작성 폼
     @GetMapping("/posts/new")
     public String createForm(Model model) {
         model.addAttribute("post", new Post());
         return "post/form";
     }
 
-    // 게시글 저장 → 목록으로 //user=null제거
+    // 게시글 저장 → 목록으로
     @PostMapping("/posts")
     public String create(@Valid @ModelAttribute Post post,
                          BindingResult bindingResult,
-                         HttpSession session,
+                         @AuthenticationPrincipal User user,
                          RedirectAttributes redirectAttributes) {
-
-        User user = (User) session.getAttribute("user");
 
         // 검증 오류가 있으면 폼으로 다시 이동
         if (bindingResult.hasErrors()) {
@@ -74,10 +73,9 @@ public class PostController {
         return "redirect:/posts";
     }
 
-    // 게시글 수정 폼 //user == null
+    // 게시글 수정 폼
     @GetMapping("/posts/{seq}/edit")
-    public String editForm(@PathVariable Long seq, HttpSession session, Model model) {
-        User user = (User) session.getAttribute("user");
+    public String editForm(@PathVariable Long seq, @AuthenticationPrincipal User user, Model model) {
         Post post = postService.findBySeq(seq);
 
         // 본인 글이 아니면 접근 거부
@@ -89,15 +87,13 @@ public class PostController {
         return "post/form";
     }
 
-    // 게시글 수정 → 상세보기로 //user == null
+    // 게시글 수정 → 상세보기로
     @PostMapping("/posts/{seq}")
     public String update(@PathVariable Long seq,
                          @Valid @ModelAttribute Post post,
                          BindingResult bindingResult,
-                         HttpSession session,
+                         @AuthenticationPrincipal User user,
                          RedirectAttributes redirectAttributes) {
-
-        User user = (User) session.getAttribute("user");
 
         // 기존 게시글 조회
         Post existingPost = postService.findBySeq(seq);
@@ -119,10 +115,10 @@ public class PostController {
         return "redirect:/posts/" + seq;
     }
 
-    // 게시글 삭제 → 목록으로//user == null
+    // 게시글 삭제 → 목록으로
     @PostMapping("/posts/{seq}/delete")
-    public String delete(@PathVariable Long seq, HttpSession session, RedirectAttributes redirectAttributes) {
-        User user = (User) session.getAttribute("user");
+    public String delete(@PathVariable Long seq, @AuthenticationPrincipal User user, RedirectAttributes redirectAttributes) {
+
         // 기존 게시글 조회
         Post existingPost = postService.findBySeq(seq);
 
@@ -135,16 +131,11 @@ public class PostController {
         redirectAttributes.addFlashAttribute("message", "flash.post.deleted");
         return "redirect:/posts";
     }
-
-    // 에러 테스트용 엔드포인트 (강의 시연용, 실제 서비스에서는 제거)
-    @GetMapping("/posts/error-test")
-    public String testError() {
-        throw new RuntimeException("This is a test error for demonstration");
-    }
-
     @GetMapping("/jokebear")
     public String showJokebearPage() {
         return "my"; // src/main/resources/templates/my.html 파일을 찾아 연결
     }
+
+
 
 }
