@@ -4,6 +4,7 @@ import io.goorm.board.entity.Post;
 import io.goorm.board.exception.PostNotFoundException;
 import io.goorm.board.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,33 +21,40 @@ public class PostService {
         return postRepository.findAll();
     }
 
-    // SEQ로 게시글 조회
+    // SEQ로 게시글 조회 (읽기 전용)
     public Post findBySeq(Long seq) {
+        return postRepository.findById(seq)
+                .orElseThrow(() -> new PostNotFoundException(seq));
+    }
+
+    // 수정용 게시글 조회 (권한 체크 포함)
+    @PreAuthorize("hasPermission(#seq, 'Post', 'WRITE')")
+    public Post findForEdit(Long seq) {
         return postRepository.findById(seq)
                 .orElseThrow(() -> new PostNotFoundException(seq));
     }
 
     // 게시글 저장
     @Transactional  // 쓰기 작업은 별도 트랜잭션
-    public Post save(Post post) {
-        return postRepository.save(post);
+    public void save(Post post) {
+        postRepository.save(post);
     }
 
-    // 게시글 수정
+    // 게시글 수정 (PermissionEvaluator 사용 - 깔끔!)
     @Transactional
-    public Post update(Long seq, Post updatePost) {
+    @PreAuthorize("hasPermission(#seq, 'Post', 'WRITE')")
+    public void update(Long seq, Post updatePost) {
         Post post = findBySeq(seq);
+
         post.setTitle(updatePost.getTitle());
         post.setContent(updatePost.getContent());
-        // 작성자는 수정하지 않음 (본인 글만 수정 가능하므로)
-        return post;  // @Transactional에 의해 자동으로 UPDATE 쿼리 실행
+        // @Transactional에 의해 자동으로 UPDATE 쿼리 실행
     }
 
-    // 게시글 삭제
+    // 게시글 삭제 (PermissionEvaluator 사용 - 깔끔!)
     @Transactional
+    @PreAuthorize("hasPermission(#seq, 'Post', 'DELETE')")
     public void delete(Long seq) {
-        // 삭제 전 게시글 존재 여부 확인
-        Post post = findBySeq(seq);  // 없으면 PostNotFoundException 발생
         postRepository.deleteById(seq);
     }
 }

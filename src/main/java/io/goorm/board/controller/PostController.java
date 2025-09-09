@@ -2,20 +2,22 @@ package io.goorm.board.controller;
 
 import io.goorm.board.entity.Post;
 import io.goorm.board.entity.User;
-import io.goorm.board.exception.AccessDeniedException;
 import io.goorm.board.service.PostService;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import lombok.extern.slf4j.Slf4j;
+
 
 import java.util.List;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class PostController {
@@ -31,7 +33,9 @@ public class PostController {
     // 게시글 목록 (기본)
     @GetMapping("/posts")
     public String list(Model model) {
+        log.debug("게시글 목록 요청 - /posts");
         List<Post> posts = postService.findAll();
+        log.debug("게시글 {} 개 조회 완료", posts.size());
 
         model.addAttribute("posts", posts);
         return "post/list";
@@ -69,20 +73,18 @@ public class PostController {
 
         // 검증 통과 시에만 저장
         postService.save(post);
+        log.info("게시글저장");
         redirectAttributes.addFlashAttribute("message", "flash.post.created");
         return "redirect:/posts";
+
+
+
     }
 
-    // 게시글 수정 폼
+    // 게시글 수정 폼 (권한 체크는 서비스에서)
     @GetMapping("/posts/{seq}/edit")
-    public String editForm(@PathVariable Long seq, @AuthenticationPrincipal User user, Model model) {
-        Post post = postService.findBySeq(seq);
-
-        // 본인 글이 아니면 접근 거부
-        if (!post.getAuthor().getId().equals(user.getId())) {
-            throw new AccessDeniedException("본인이 작성한 글만 수정할 수 있습니다.");
-        }
-
+    public String editForm(@PathVariable Long seq, Model model) {
+        Post post = postService.findForEdit(seq); // 서비스에서 권한 체크
         model.addAttribute("post", post);
         return "post/form";
     }
@@ -92,16 +94,7 @@ public class PostController {
     public String update(@PathVariable Long seq,
                          @Valid @ModelAttribute Post post,
                          BindingResult bindingResult,
-                         @AuthenticationPrincipal User user,
                          RedirectAttributes redirectAttributes) {
-
-        // 기존 게시글 조회
-        Post existingPost = postService.findBySeq(seq);
-
-        // 본인 글이 아니면 접근 거부
-        if (!existingPost.getAuthor().getId().equals(user.getId())) {
-            throw new AccessDeniedException("본인이 작성한 글만 수정할 수 있습니다.");
-        }
 
         // 검증 오류가 있으면 폼으로 다시 이동
         if (bindingResult.hasErrors()) {
@@ -109,7 +102,7 @@ public class PostController {
             return "post/form";
         }
 
-        // 검증 통과 시에만 수정
+        // 서비스에서 @PreAuthorize로 권한 체크
         postService.update(seq, post);
         redirectAttributes.addFlashAttribute("message", "flash.post.updated");
         return "redirect:/posts/" + seq;
@@ -117,16 +110,9 @@ public class PostController {
 
     // 게시글 삭제 → 목록으로
     @PostMapping("/posts/{seq}/delete")
-    public String delete(@PathVariable Long seq, @AuthenticationPrincipal User user, RedirectAttributes redirectAttributes) {
+    public String delete(@PathVariable Long seq, RedirectAttributes redirectAttributes) {
 
-        // 기존 게시글 조회
-        Post existingPost = postService.findBySeq(seq);
-
-        // 본인 글이 아니면 접근 거부
-        if (!existingPost.getAuthor().getId().equals(user.getId())) {
-            throw new AccessDeniedException("본인이 작성한 글만 삭제할 수 있습니다.");
-        }
-
+        // 서비스에서 @PreAuthorize로 권한 체크
         postService.delete(seq);
         redirectAttributes.addFlashAttribute("message", "flash.post.deleted");
         return "redirect:/posts";
@@ -135,7 +121,6 @@ public class PostController {
     public String showJokebearPage() {
         return "my"; // src/main/resources/templates/my.html 파일을 찾아 연결
     }
-
 
 
 }
